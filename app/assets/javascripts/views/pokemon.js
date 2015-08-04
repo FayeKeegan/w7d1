@@ -8,6 +8,7 @@ Pokedex.Views.Pokemon = Backbone.View.extend({
     this.pokemon = new Pokedex.Collections.Pokemon();
     this.$pokeList.on("click", "li.poke-list-item", this.selectPokemonFromList.bind(this))
     this.$newPoke.on("submit", this.submitPokemonForm.bind(this));
+    this.$pokeDetail.on("click", "li.toy-list-item", this.selectToyFromList.bind(this))
   },
 
   selectPokemonFromList: function (event) {
@@ -15,6 +16,19 @@ Pokedex.Views.Pokemon = Backbone.View.extend({
     // debugger
     var pokemon = this.pokemon.get($li.data("id"));
     this.renderPokemonDetail(pokemon);
+  },
+
+  selectToyFromList: function (event) {
+    var $li = $(event.currentTarget);
+    // var toy = new Pokedex.Models.Toy({ id: $li.data("id") });
+    var view = this;
+    var pokemon = this.pokemon.get($li.data("pokemon-id"));
+    pokemon.fetch({
+      success: function () {
+        var pokeToy = pokemon.toys().get($li.data("id"));
+        view.renderToyDetail(pokeToy);
+      }
+    });
   },
 
   addPokemonToList: function (pokemon) {
@@ -40,6 +54,7 @@ Pokedex.Views.Pokemon = Backbone.View.extend({
   },
 
   renderPokemonDetail: function (pokemon) {
+    this.$toyDetail.children().remove();
     var $div = $("<div>").addClass("detail");
     var $img = $("<img>");
     $img.attr("src", pokemon.get("image_url"));
@@ -50,7 +65,33 @@ Pokedex.Views.Pokemon = Backbone.View.extend({
         $div.append($li);
       }
     }
+    var $toys = $("<ul>").addClass("toys");
+    pokemon.fetch({
+        success: function(){
+          var pokeToys = pokemon.toys();
+          pokeToys.forEach( function (toy) {
+            var $li = $("<li>")
+              .addClass("toy-list-item")
+              .data("id", toy.get("id"))
+              .data("pokemon-id", pokemon.get("id"));
+            $li.text("id: " + toy.get("id") + "  name: " + toy.get("name"))
+            $toys.append($li);
+          })
+        }
+    })
     this.$pokeDetail.html($div);
+    this.$pokeDetail.append($toys);
+  },
+
+  renderToyDetail: function(toy){
+    var $toyDiv = $("<div>").addClass("toy-detail")
+    var $img = $("<img>").attr("src", toy.get("image_url"));
+    $toyDiv.append($img);
+    for (attr in toy.toJSON()) {
+      var $toy_li = $("<li>").text(attr + ": " + toy.get(attr)).addClass("toy-list-item");
+      $toyDiv.append($toy_li);
+    }
+    this.$toyDetail.html($toyDiv);
   },
 
   createPokemon: function (attributes, callback) {

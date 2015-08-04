@@ -1,3 +1,3 @@
-Pokedex.Models.Toys = Backbone.Model.extend({
-  
+Pokedex.Models.Toy = Backbone.Model.extend({
+
 })

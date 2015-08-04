@@ -21,6 +21,7 @@ class PokemonController < ApplicationController
 
   def  show
     @pokemon = Pokemon.find(params[:id])
+    @display_toys = true;
     @toys = @pokemon.toys
   end
 
